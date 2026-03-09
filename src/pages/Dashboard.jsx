@@ -1,26 +1,46 @@
 // src/pages/Dashboard.jsx
+import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Package, TrendingUp, TrendingDown, AlertCircle, BarChart3 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function Dashboard() {
     const { products, history } = useOutletContext();
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // คำนวณสถิติต่างๆ
     const totalSKU = products.length;
     const totalStock = products.reduce((sum, item) => sum + item.stock, 0);
 
+    const isInvalidRange = Boolean(startDate && endDate && startDate > endDate);
+
+    const filteredHistory = useMemo(() => {
+        if (isInvalidRange) return [];
+
+        const startBoundary = startDate ? new Date(`${startDate}T00:00:00`) : null;
+        const endBoundary = endDate ? new Date(`${endDate}T23:59:59.999`) : null;
+
+        return history.filter((record) => {
+            const recordDate = new Date(record.timestamp);
+            if (Number.isNaN(recordDate.getTime())) return false;
+            if (startBoundary && recordDate < startBoundary) return false;
+            if (endBoundary && recordDate > endBoundary) return false;
+            return true;
+        });
+    }, [history, startDate, endDate, isInvalidRange]);
+
     // คำนวณยอดรับเข้า-เบิกออก (รวมทั้งหมด)
-    const totalIn = history.filter(h => h.type === 'IN').reduce((sum, h) => sum + h.quantity, 0);
-    const totalOut = history.filter(h => h.type === 'OUT').reduce((sum, h) => sum + h.quantity, 0);
+    const totalIn = filteredHistory.filter(h => h.type === 'IN').reduce((sum, h) => sum + h.quantity, 0);
+    const totalOut = filteredHistory.filter(h => h.type === 'OUT').reduce((sum, h) => sum + h.quantity, 0);
 
     // หาสินค้าที่สต๊อกเหลือน้อย (น้อยกว่าหรือเท่ากับ 20 ชิ้น)
     const lowStockItems = products.filter(p => p.stock <= 20);
 
     // เตรียมข้อมูลสำหรับกราฟ (แยกตามสินค้า)
     const chartData = products.map(p => {
-        const inQty = history.filter(h => h.productId === p.id && h.type === 'IN').reduce((sum, h) => sum + h.quantity, 0);
-        const outQty = history.filter(h => h.productId === p.id && h.type === 'OUT').reduce((sum, h) => sum + h.quantity, 0);
+        const inQty = filteredHistory.filter(h => h.productId === p.id && h.type === 'IN').reduce((sum, h) => sum + h.quantity, 0);
+        const outQty = filteredHistory.filter(h => h.productId === p.id && h.type === 'OUT').reduce((sum, h) => sum + h.quantity, 0);
         return {
             name: p.name, 
             sku: p.sku,
@@ -29,16 +49,68 @@ export default function Dashboard() {
         };
     }).filter(data => data.inbound > 0 || data.outbound > 0);
 
-    // เตรียมข้อมูลสำหรับกราฟรวมทั้งหมด
+    // เตรียมข้อมูลสำหรับกราฟรวมทั้งหมด (Pie Chart)
     const totalSummaryData = [
-        { name: 'รวมทั้งหมด (Total)', inbound: totalIn, outbound: totalOut }
-    ];
+        { name: 'นำเข้ารวม (Total In)', value: totalIn, color: '#10B981' },
+        { name: 'เบิกออกรวม (Total Out)', value: totalOut, color: '#F97316' }
+    ].filter(item => item.value > 0);
+
+    const rangeText = `${startDate || 'ไม่จำกัด'} - ${endDate || 'ไม่จำกัด'}`;
 
     return (
         <div className="animate-in fade-in duration-300 space-y-4">
             <div className="flex items-center gap-2 mb-4 border-b pb-2 border-gray-200">
                 <BarChart3 className="text-primary-600" size={24} />
                 <h2 className="text-2xl font-bold text-primary-600"> Dashboard </h2>
+            </div>
+
+            {/* ตัวเลือกช่วงวันที่ */}
+            <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-800 text-sm">ช่วงวันที่สำหรับสรุปข้อมูล</h3>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setStartDate('');
+                            setEndDate('');
+                        }}
+                        className="text-xs text-primary-600 hover:text-primary-700 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                        disabled={!startDate && !endDate}
+                    >
+                        ล้างช่วงวันที่
+                    </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">วันที่เริ่มต้น</label>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            max={endDate || undefined}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 bg-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">วันที่สิ้นสุด</label>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            min={startDate || undefined}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 bg-white"
+                        />
+                    </div>
+                </div>
+                <div className="mt-3 text-xs">
+                    {isInvalidRange ? (
+                        <p className="text-red-600">ช่วงวันที่ไม่ถูกต้อง: วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด</p>
+                    ) : (
+                        <p className="text-gray-500">
+                            ช่วงที่เลือก: {rangeText} | รายการที่พบ: {filteredHistory.length} รายการ
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* สรุปตัวเลขด้านบน */}
@@ -62,7 +134,7 @@ export default function Dashboard() {
                         <TrendingUp size={20} />
                     </div>
                     <div>
-                        <div className="text-xs text-gray-500">นำเข้ารวม</div>
+                        <div className="text-xs text-gray-500">นำเข้ารวม (ช่วงที่เลือก)</div>
                         <div className="text-lg font-bold text-gray-800">{totalIn}</div>
                     </div>
                 </div>
@@ -72,7 +144,7 @@ export default function Dashboard() {
                         <TrendingDown size={20} />
                     </div>
                     <div>
-                        <div className="text-xs text-gray-500">เบิกออกรวม</div>
+                        <div className="text-xs text-gray-500">เบิกออกรวม (ช่วงที่เลือก)</div>
                         <div className="text-lg font-bold text-gray-800">{totalOut}</div>
                     </div>
                 </div>
@@ -82,17 +154,23 @@ export default function Dashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-4 mt-2 mb-4">
                 <h3 className="font-semibold text-gray-800 text-sm mb-4">สถิติรวมนำเข้า-เบิกออกทั้งหมด</h3>
                 <div className="h-48 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={totalSummaryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                            <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#6B7280', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                            <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                            <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
-                            <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
-                            <Bar dataKey="inbound" name="นำเข้ารวม (Total In)" fill="#10B981" radius={[4, 4, 0, 0]} barSize={60} />
-                            <Bar dataKey="outbound" name="เบิกออกรวม (Total Out)" fill="#F97316" radius={[4, 4, 0, 0]} barSize={60} />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    {totalSummaryData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} formatter={(value) => [`${value} ชิ้น`, 'จำนวน']} />
+                                <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
+                                <Pie data={totalSummaryData} dataKey="value" nameKey="name" cx="50%" cy="45%" outerRadius={65} innerRadius={35} paddingAngle={3}>
+                                    {totalSummaryData.map((entry) => (
+                                        <Cell key={entry.name} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                            ยังไม่มีข้อมูลการทำรายการ
+                        </div>
+                    )}
                 </div>
             </div>
 
