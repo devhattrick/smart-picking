@@ -22,13 +22,15 @@ const getStoredUser = (): User | null => {
   }
 };
 
+const routerBase = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+
 function App() {
   const [products, setProducts] = useState(initialProducts);
   const [history, setHistory] = useState(initialHistory);
   const [user, setUser] = useState<User | null>(getStoredUser);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBase}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login setUser={setUser} />} />
 

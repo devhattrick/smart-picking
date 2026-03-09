@@ -19,6 +19,7 @@ export default function Layout({ products, setProducts, history, setHistory, use
     navigate('/login');
   };
 
+  //* ปรับการมองเห็น Page ที่ Role ['admin', 'employee']
   const allNavItems: NavItem[] = [
     { path: '/dashboard', name: 'ภาพรวม', icon: <LayoutDashboard size={24} />, roles: ['admin', 'employee'] },
     { path: '/products', name: 'สินค้า', icon: <Package size={24} />, roles: ['admin'] },
