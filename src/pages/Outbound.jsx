@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { locations } from '../data/mockData';
+import ActionPopup from '../components/ActionPopup';
 
 export default function Outbound() {
     const { products, setProducts, history, setHistory } = useOutletContext();
@@ -12,19 +13,42 @@ export default function Outbound() {
         location: locations[0],
         person: ''
     });
+    const [popup, setPopup] = useState({
+        open: false,
+        type: 'success',
+        title: '',
+        message: '',
+        autoCloseMs: 2200,
+    });
+
+    const showPopup = (type, title, message, autoCloseMs = type === 'success' ? 2200 : 0) => {
+        setPopup({ open: true, type, title, message, autoCloseMs });
+    };
+
+    const closePopup = () => {
+        setPopup(prev => ({ ...prev, open: false }));
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const qty = Number(formData.quantity);
         const prodId = Number(formData.productId);
 
-        if (!prodId || qty <= 0 || !formData.person) return alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+        if (!prodId || qty <= 0 || !formData.person) {
+            showPopup('error', 'ข้อมูลไม่ครบถ้วน', 'กรุณากรอกข้อมูลให้ครบก่อนบันทึก');
+            return;
+        }
 
         const selectedProduct = products.find(p => p.id === prodId);
+        if (!selectedProduct) {
+            showPopup('error', 'ไม่พบสินค้า', 'ไม่พบรายการสินค้าที่เลือก กรุณาลองใหม่อีกครั้ง');
+            return;
+        }
 
         // **ตรวจสอบว่าสต๊อกพอหรือไม่**
         if (selectedProduct.stock < qty) {
-            return alert(`สต๊อกไม่เพียงพอ! (คงเหลือ: ${selectedProduct.stock})`);
+            showPopup('error', 'สต๊อกไม่เพียงพอ', `คงเหลือ ${selectedProduct.stock} ชิ้น`);
+            return;
         }
 
         // 1. ลดสต๊อกสินค้า
@@ -44,7 +68,11 @@ export default function Outbound() {
         };
         setHistory([newLog, ...history]);
 
-        alert('บันทึกการเบิกสินค้าเรียบร้อย!');
+        showPopup(
+            'success',
+            'บันทึกการเบิกออกสำเร็จ',
+            `[${selectedProduct.sku}] ${selectedProduct.name} จำนวน ${qty} ชิ้น`
+        );
         setFormData({ productId: '', quantity: '', location: locations[0], person: '' });
     };
 
@@ -92,6 +120,15 @@ export default function Outbound() {
                     บันทึกการเบิกออก
                 </button>
             </form>
+
+            <ActionPopup
+                open={popup.open}
+                type={popup.type}
+                title={popup.title}
+                message={popup.message}
+                onClose={closePopup}
+                autoCloseMs={popup.autoCloseMs}
+            />
         </div>
     );
 }
