@@ -1,6 +1,18 @@
 import { useEffect } from 'react';
 import { AlertTriangle, CheckCircle2, X } from 'lucide-react';
 
+type PopupType = 'success' | 'error';
+
+interface ActionPopupProps {
+    open: boolean;
+    type?: PopupType;
+    title: string;
+    message: string;
+    onClose: () => void;
+    actionText?: string;
+    autoCloseMs?: number;
+}
+
 const popupStyles = {
     success: {
         icon: CheckCircle2,
@@ -14,7 +26,7 @@ const popupStyles = {
         iconColor: 'text-rose-600',
         button: 'bg-rose-500 hover:bg-rose-600',
     },
-};
+} as const;
 
 export default function ActionPopup({
     open,
@@ -24,7 +36,7 @@ export default function ActionPopup({
     onClose,
     actionText = 'ตกลง',
     autoCloseMs = 2200,
-}) {
+}: ActionPopupProps) {
     useEffect(() => {
         if (!open || !autoCloseMs) return undefined;
 
