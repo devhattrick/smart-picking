@@ -1,23 +1,34 @@
-// src/pages/Home.jsx
+// src/pages/Home.tsx
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
+import type { AppOutletContext, Product } from '../types';
+
+interface ProductFormData {
+  id: number | null;
+  name: string;
+  sku: string;
+  stock: number;
+}
 
 export default function Home() {
   // ดึงข้อมูลสินค้ามาจาก Layout
-  const { products, setProducts } = useOutletContext();
+  const { products, setProducts } = useOutletContext<AppOutletContext>();
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({ id: null, name: '', sku: '', stock: 0 });
+  const [formData, setFormData] = useState<ProductFormData>({ id: null, name: '', sku: '', stock: 0 });
 
   // ฟังก์ชันบันทึกข้อมูล (ใช้ได้ทั้งเพิ่มและแก้ไข)
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (formData.id) {
+    if (formData.id !== null) {
       // กรณีแก้ไข
-      setProducts(products.map(p => p.id === formData.id ? { ...formData, stock: Number(formData.stock) } : p));
+      const updatedProduct: Product = { ...formData, id: formData.id, stock: Number(formData.stock) };
+      setProducts(products.map(p => p.id === formData.id ? updatedProduct : p));
     } else {
       // กรณีเพิ่มใหม่
-      setProducts([...products, { ...formData, id: Date.now(), stock: Number(formData.stock) }]);
+      const newProduct: Product = { ...formData, id: Date.now(), stock: Number(formData.stock) };
+      setProducts([...products, newProduct]);
     }
     closeForm();
   };
@@ -68,7 +79,7 @@ export default function Home() {
 
       {/* รายการสินค้าในระบบ */}
       <div className="space-y-3 pb-4">
-        {products.map(product => (
+        {products.map((product: Product) => (
           <div key={product.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
             <div>
               <div className="text-xs text-primary-600 font-semibold mb-0.5">{product.sku}</div>

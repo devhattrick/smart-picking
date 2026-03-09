@@ -1,11 +1,12 @@
-// src/pages/Dashboard.jsx
+// src/pages/Dashboard.tsx
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Package, TrendingUp, TrendingDown, AlertCircle, BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import type { AppOutletContext } from '../types';
 
 export default function Dashboard() {
-    const { products, history } = useOutletContext();
+    const { products, history } = useOutletContext<AppOutletContext>();
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 

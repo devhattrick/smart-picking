@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.tsx
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -9,13 +9,23 @@ import History from './pages/History';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import { initialProducts, initialHistory } from './data/mockData';
+import type { User } from './types';
+
+const getStoredUser = (): User | null => {
+  const rawUser = localStorage.getItem('user');
+  if (!rawUser) return null;
+
+  try {
+    return JSON.parse(rawUser) as User;
+  } catch {
+    return null;
+  }
+};
 
 function App() {
   const [products, setProducts] = useState(initialProducts);
   const [history, setHistory] = useState(initialHistory);
-
-  const storedUser = localStorage.getItem('user');
-  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : null);
+  const [user, setUser] = useState<User | null>(getStoredUser);
 
   return (
     <BrowserRouter>

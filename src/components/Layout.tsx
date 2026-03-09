@@ -1,7 +1,16 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Package, ArrowDownToLine, ArrowUpFromLine, ClipboardList, LayoutDashboard, LogOut } from 'lucide-react';
+import type { ReactNode } from 'react';
+import type { LayoutProps, UserRole } from '../types';
 
-export default function Layout({ products, setProducts, history, setHistory, user, setUser }) {
+interface NavItem {
+  path: string;
+  name: string;
+  icon: ReactNode;
+  roles: UserRole[];
+}
+
+export default function Layout({ products, setProducts, history, setHistory, user, setUser }: LayoutProps) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -10,7 +19,7 @@ export default function Layout({ products, setProducts, history, setHistory, use
     navigate('/login');
   };
 
-  const allNavItems = [
+  const allNavItems: NavItem[] = [
     { path: '/dashboard', name: 'ภาพรวม', icon: <LayoutDashboard size={24} />, roles: ['admin', 'employee'] },
     { path: '/products', name: 'สินค้า', icon: <Package size={24} />, roles: ['admin'] },
     { path: '/inbound', name: 'นำเข้า', icon: <ArrowDownToLine size={24} />, roles: ['admin', 'employee'] },
@@ -18,7 +27,7 @@ export default function Layout({ products, setProducts, history, setHistory, use
     { path: '/history', name: 'ประวัติ', icon: <ClipboardList size={24} />, roles: ['admin', 'employee'] },
   ];
 
-  const navItems = allNavItems.filter(item => item.roles.includes(user?.role));
+  const navItems = allNavItems.filter(item => (user ? item.roles.includes(user.role) : false));
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20 font-sans">

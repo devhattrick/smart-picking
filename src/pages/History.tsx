@@ -1,18 +1,19 @@
-// src/pages/History.jsx
+// src/pages/History.tsx
 import { useOutletContext } from 'react-router-dom';
 import { ArrowDownRight, ArrowUpRight, Clock, MapPin, User } from 'lucide-react';
+import type { AppOutletContext } from '../types';
 
 export default function History() {
-    const { history, products } = useOutletContext();
+    const { history, products } = useOutletContext<AppOutletContext>();
 
     // ฟังก์ชันช่วยหาชื่อและ SKU สินค้าจาก ID
-    const getProductDetails = (productId) => {
+    const getProductDetails = (productId: number) => {
         const product = products.find(p => p.id === productId);
         return product ? `[${product.sku}] ${product.name}` : 'ไม่พบข้อมูลสินค้า (อาจถูกลบ)';
     };
 
     // ฟังก์ชันแปลงวันที่ให้ดูอ่านง่าย (ภาษาไทย)
-    const formatDateTime = (isoString) => {
+    const formatDateTime = (isoString: string) => {
         const date = new Date(isoString);
         return date.toLocaleDateString('th-TH', {
             year: '2-digit', month: 'short', day: 'numeric',

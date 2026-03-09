@@ -1,19 +1,38 @@
-// src/pages/Inbound.jsx
+// src/pages/Inbound.tsx
 import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { locations } from '../data/mockData';
 import ActionPopup from '../components/ActionPopup';
+import type { AppOutletContext, MovementLog } from '../types';
+
+type PopupType = 'success' | 'error';
+
+interface InboundFormData {
+    productId: string;
+    quantity: string;
+    location: string;
+    person: string;
+}
+
+interface PopupState {
+    open: boolean;
+    type: PopupType;
+    title: string;
+    message: string;
+    autoCloseMs: number;
+}
 
 export default function Inbound() {
-    const { products, setProducts, history, setHistory } = useOutletContext();
+    const { products, setProducts, history, setHistory } = useOutletContext<AppOutletContext>();
 
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<InboundFormData>({
         productId: '',
         quantity: '',
         location: locations[0],
         person: ''
     });
-    const [popup, setPopup] = useState({
+    const [popup, setPopup] = useState<PopupState>({
         open: false,
         type: 'success',
         title: '',
@@ -21,7 +40,7 @@ export default function Inbound() {
         autoCloseMs: 2200,
     });
 
-    const showPopup = (type, title, message, autoCloseMs = type === 'success' ? 2200 : 0) => {
+    const showPopup = (type: PopupType, title: string, message: string, autoCloseMs = type === 'success' ? 2200 : 0) => {
         setPopup({ open: true, type, title, message, autoCloseMs });
     };
 
@@ -29,7 +48,7 @@ export default function Inbound() {
         setPopup(prev => ({ ...prev, open: false }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const qty = Number(formData.quantity);
         const prodId = Number(formData.productId);
@@ -51,7 +70,7 @@ export default function Inbound() {
         ));
 
         // 2. บันทึกประวัติ
-        const newLog = {
+        const newLog: MovementLog = {
             id: Date.now(),
             type: 'IN',
             productId: prodId,

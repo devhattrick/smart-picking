@@ -1,14 +1,20 @@
 import { useState } from 'react';
+import type { Dispatch, FormEvent, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockUsers } from '../data/mockData';
+import type { User } from '../types';
 
-export default function Login({ setUser }) {
+interface LoginProps {
+  setUser: Dispatch<SetStateAction<User | null>>;
+}
+
+export default function Login({ setUser }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const user = mockUsers.find(u => u.username === username && u.password === password);
     
