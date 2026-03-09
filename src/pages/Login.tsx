@@ -13,6 +13,7 @@ export default function Login({ setUser }: LoginProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const loginBackgroundUrl = `${import.meta.env.BASE_URL}inventory-modern.jpg`;
 
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,7 +33,7 @@ export default function Login({ setUser }: LoginProps) {
       <div className="absolute inset-0">
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
-          style={{ backgroundImage: "url('/inventory-modern.jpg')" }}
+          style={{ backgroundImage: `url('${loginBackgroundUrl}')` }}
         />
         <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]" />
       </div>
@@ -41,7 +42,7 @@ export default function Login({ setUser }: LoginProps) {
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2"><span className="text-amber-300 drop-shadow-lg">LSMA4 </span>
             Picking System</h1>
-          <p className="text-gray-500 text-sm drop-shadow-md">เข้าสู่ระบบเพื่อใช้งาน</p>
+          <p className="text-gray-500 text-sm drop-shadow-md mt-2">เข้าสู่ระบบเพื่อใช้งาน</p>
         </div>
 
         {error && (
