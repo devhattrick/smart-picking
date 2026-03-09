@@ -16,7 +16,11 @@ export default function Home() {
   // ดึงข้อมูลสินค้ามาจาก Layout
   const { products, setProducts } = useOutletContext<AppOutletContext>();
   const [showForm, setShowForm] = useState(false);
+  const [nameFilter, setNameFilter] = useState('');
   const [formData, setFormData] = useState<ProductFormData>({ id: null, name: '', sku: '', stock: 0 });
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(nameFilter.trim().toLowerCase())
+  );
 
   // ฟังก์ชันบันทึกข้อมูล (ใช้ได้ทั้งเพิ่มและแก้ไข)
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -40,11 +44,11 @@ export default function Home() {
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <h2 className="text-lg font-semibold text-gray-800">รายการสินค้า</h2>
         <button
           onClick={() => setShowForm(true)}
-          className="bg-primary-600 text-white px-3 py-2 rounded-lg flex items-center gap-1 text-sm shadow-sm hover:bg-primary-700 transition-colors"
+          className="bg-primary-600 text-white px-3 py-2 rounded-lg flex items-center justify-center gap-1 text-sm shadow-sm hover:bg-primary-700 transition-colors w-full sm:w-auto"
         >
           <Plus size={16} /> เพิ่มสินค้า
         </button>
@@ -57,7 +61,7 @@ export default function Home() {
             <h3 className="font-medium text-primary-700">{formData.id ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}</h3>
             <button onClick={closeForm} className="text-gray-400 hover:text-red-500"><X size={20} /></button>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">รหัสสินค้า (SKU)</label>
               <input type="text" required value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
@@ -70,7 +74,7 @@ export default function Home() {
               <label className="block text-xs text-gray-500 mb-1">จำนวนตั้งต้น</label>
               <input type="number" required min="0" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div> */}
-            <button type="submit" className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">
+            <button type="submit" className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors sm:col-span-2">
               บันทึกข้อมูล
             </button>
           </form>
@@ -79,14 +83,28 @@ export default function Home() {
 
       {/* รายการสินค้าในระบบ */}
       <div className="space-y-3 pb-4">
-        {products.map((product: Product) => (
-          <div key={product.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+        <div className="bg-white p-3 rounded-xl border border-gray-100">
+          <label htmlFor="product-name-filter" className="block text-xs text-gray-500 mb-1">
+            ค้นหาชื่อสินค้า
+          </label>
+          <input
+            id="product-name-filter"
+            type="text"
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
+            placeholder="พิมพ์ชื่อสินค้า..."
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        {filteredProducts.map((product: Product) => (
+          <div key={product.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center items-start gap-3">
             <div>
               <div className="text-xs text-primary-600 font-semibold mb-0.5">{product.sku}</div>
               <div className="font-medium text-gray-800 leading-tight">{product.name}</div>
               <div className="text-sm text-gray-500 mt-1">คงเหลือ: <span className="font-semibold text-gray-800">{product.stock}</span></div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 self-end sm:self-auto">
               <button onClick={() => { setFormData(product); setShowForm(true); }} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                 <Edit size={16} />
               </button>
@@ -98,6 +116,9 @@ export default function Home() {
         ))}
         {products.length === 0 && (
           <div className="text-center text-gray-500 py-8 text-sm">ไม่มีข้อมูลสินค้า กรุณาเพิ่มสินค้า</div>
+        )}
+        {products.length > 0 && filteredProducts.length === 0 && (
+          <div className="text-center text-gray-500 py-8 text-sm">ไม่พบสินค้าที่ตรงกับคำค้นหา</div>
         )}
       </div>
     </div>

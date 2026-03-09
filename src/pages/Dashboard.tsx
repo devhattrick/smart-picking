@@ -62,7 +62,7 @@ export default function Dashboard() {
         <div className="animate-in fade-in duration-300 space-y-4">
             <div className="flex items-center gap-2 mb-4 border-b pb-2 border-gray-200">
                 <BarChart3 className="text-primary-600" size={24} />
-                <h2 className="text-2xl font-bold text-primary-600"> Dashboard </h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-primary-600"> Dashboard </h2>
             </div>
 
             {/* ตัวเลือกช่วงวันที่ */}
@@ -81,7 +81,7 @@ export default function Dashboard() {
                         ล้างช่วงวันที่
                     </button>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label className="block text-xs font-medium text-gray-700 mb-1">วันที่เริ่มต้น</label>
                         <input
@@ -115,7 +115,7 @@ export default function Dashboard() {
             </div>
 
             {/* สรุปตัวเลขด้านบน */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-primary-100 flex flex-col items-center justify-center">
                     <Package className="text-primary-500 mb-1" size={28} />
                     <div className="text-l font-bold text-gray-800">{totalSKU}</div>
@@ -129,7 +129,7 @@ export default function Dashboard() {
             </div>
 
             {/* สรุปการเคลื่อนไหว */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-green-100 flex items-center gap-3">
                     <div className="p-2 bg-green-50 text-green-600 rounded-lg">
                         <TrendingUp size={20} />
@@ -154,7 +154,7 @@ export default function Dashboard() {
             {/* กราฟสถิติรวมนำเข้า-เบิกออกทั้งหมด */}
             <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-4 mt-2 mb-4">
                 <h3 className="font-semibold text-gray-800 text-sm mb-4">สถิติรวมนำเข้า-เบิกออกทั้งหมด</h3>
-                <div className="h-48 w-full">
+                <div className="h-52 sm:h-56 w-full">
                     {totalSummaryData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -179,7 +179,7 @@ export default function Dashboard() {
             <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-4 mt-2">
                 <h3 className="font-semibold text-gray-800 text-sm mb-4">สถิติการรับเข้า-เบิกออก (ตาม SKU)</h3>
                 {chartData.length > 0 ? (
-                    <div className="h-64 w-full">
+                    <div className="h-64 sm:h-72 w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />

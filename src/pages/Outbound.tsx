@@ -97,9 +97,9 @@ export default function Outbound() {
 
     return (
         <div className="animate-in fade-in duration-300">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2 border-gray-200">เบิกออกสินค้า (Outbound)</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4 border-b pb-2 border-gray-200">เบิกออกสินค้า (Outbound)</h2>
 
-            <form onSubmit={handleSubmit} className="bg-white p-5 rounded-xl shadow-sm border border-orange-100 space-y-4">
+            <form onSubmit={handleSubmit} className="bg-white p-5 rounded-xl shadow-sm border border-orange-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">เลือกสินค้า</label>
                     <select required value={formData.productId} onChange={e => setFormData({ ...formData, productId: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 bg-white">
@@ -135,7 +135,7 @@ export default function Outbound() {
                     <input type="text" required value={formData.person} onChange={e => setFormData({ ...formData, person: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500" placeholder="ชื่อผู้ทำรายการ" />
                 </div>
 
-                <button type="submit" className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors mt-2 shadow-md">
+                <button type="submit" className="w-full bg-orange-500 text-white py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors mt-2 shadow-md md:col-span-2">
                     บันทึกการเบิกออก
                 </button>
             </form>

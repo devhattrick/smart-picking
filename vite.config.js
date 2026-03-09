@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
           scope: base,
           icons: [
             {
-              src: 'https://cdn-icons-png.flaticon.com/512/3045/3045670.png', // ไอคอนชั่วคราว
+              src: 'logo.png', // ไอคอนชั่วคราว
               sizes: '512x512',
               type: 'image/png'
             }
