@@ -4,7 +4,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const base = env.VITE_BASE_PATH || (mode === 'production' ? '/picking-system/' : '/')
+  const rawBase = env.VITE_BASE_PATH || (mode === 'production' ? '/smart-picking/' : '/')
+  const withLeadingSlash = rawBase.startsWith('/') ? rawBase : `/${rawBase}`
+  const base = withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`
 
   return {
     base,
