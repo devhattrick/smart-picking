@@ -1,0 +1,56 @@
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Package, ArrowDownToLine, ArrowUpFromLine, ClipboardList, LayoutDashboard, LogOut } from 'lucide-react';
+
+export default function Layout({ products, setProducts, history, setHistory, user, setUser }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/login');
+  };
+
+  const allNavItems = [
+    { path: '/dashboard', name: 'ภาพรวม', icon: <LayoutDashboard size={24} />, roles: ['admin', 'employee'] },
+    { path: '/products', name: 'สินค้า', icon: <Package size={24} />, roles: ['admin'] },
+    { path: '/inbound', name: 'นำเข้า', icon: <ArrowDownToLine size={24} />, roles: ['admin', 'employee'] },
+    { path: '/outbound', name: 'เบิกออก', icon: <ArrowUpFromLine size={24} />, roles: ['admin', 'employee'] },
+    { path: '/history', name: 'ประวัติ', icon: <ClipboardList size={24} />, roles: ['admin', 'employee'] },
+  ];
+
+  const navItems = allNavItems.filter(item => item.roles.includes(user?.role));
+
+  return (
+    <div className="min-h-screen bg-slate-50 pb-20 font-sans">
+      <header className="bg-primary-600 text-white p-4 shadow-md sticky top-0 z-10 flex justify-between items-center">
+        <h1 className="text-xl font-bold tracking-wide">Smart Picking</h1>
+        <button onClick={handleLogout} className="text-white hover:text-red-200 transition-colors p-1" title="ออกจากระบบ">
+          <LogOut size={20} />
+        </button>
+      </header>
+
+      <main className="p-4 max-w-md mx-auto">
+        {/* ส่ง Context ให้หน้าลูกๆ เอาไปใช้งาน */}
+        <Outlet context={{ products, setProducts, history, setHistory, user }} />
+      </main>
+
+      <nav className="fixed bottom-0 w-full bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-10">
+        <div className="flex justify-around items-center h-16 max-w-md mx-auto">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive ? 'text-primary-600 font-medium' : 'text-gray-400 hover:text-primary-500'
+                }`
+              }
+            >
+              {item.icon}
+              <span className="text-[10px]">{item.name}</span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}

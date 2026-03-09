@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f8fafc; /* พื้นหลังสีขาวอมเทานิดๆ ให้ดูสบายตา */
+  margin: 0;
+  font-family: 'Kanit', sans-serif;
+}
