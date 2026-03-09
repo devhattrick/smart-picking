@@ -28,12 +28,20 @@ export default function Login({ setUser }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 sm:p-6 font-sans">
-      <div className="w-full max-w-sm sm:max-w-md bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-100">
+    <div className="min-h-screen relative overflow-hidden flex flex-col justify-center items-center p-4 sm:p-6 font-sans">
+      <div className="absolute inset-0">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          style={{ backgroundImage: "url('/inventory-modern.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white/70 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl border border-white/40">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2"><span className="text-yellow-400">LSMA4 </span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2"><span className="text-amber-300 drop-shadow-lg">LSMA4 </span>
             Picking System</h1>
-          <p className="text-gray-500 text-sm">เข้าสู่ระบบเพื่อใช้งาน</p>
+          <p className="text-gray-500 text-sm drop-shadow-md">เข้าสู่ระบบเพื่อใช้งาน</p>
         </div>
 
         {error && (
@@ -44,7 +52,7 @@ export default function Login({ setUser }: LoginProps) {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ใช้</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1 ">ชื่อผู้ใช้</label>
             <input 
               type="text" 
               required 
