@@ -31,7 +31,8 @@ export default function Login({ setUser }: LoginProps) {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4 sm:p-6 font-sans">
       <div className="w-full max-w-sm sm:max-w-md bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-100">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2">Smart Picking</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2"><span className="text-yellow-400">LSMA4 </span>
+            Picking System</h1>
           <p className="text-gray-500 text-sm">เข้าสู่ระบบเพื่อใช้งาน</p>
         </div>
 
