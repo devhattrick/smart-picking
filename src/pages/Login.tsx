@@ -88,6 +88,11 @@ export default function Login({ setUser }: LoginProps) {
           <p>Admin: admin / password</p>
           <p>Employee: emp / password</p>
         </div>
+
+        <div className="mt-6 text-center text-xs text-gray-400">
+          <p>Version: 1.0.2</p>
+
+        </div>
       </div>
     </div>
   );

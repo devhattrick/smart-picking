@@ -1,8 +1,8 @@
 // src/pages/Home.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Plus, Edit, Trash2, X } from 'lucide-react';
 import type { AppOutletContext, Product } from '../types';
 
 interface ProductFormData extends Omit<Product, 'id'> {
@@ -27,6 +27,7 @@ export default function Home() {
   const { products, setProducts } = useOutletContext<AppOutletContext>();
   const [showForm, setShowForm] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
   const filteredProducts = products.filter((product) =>
     `${product.sku} ${product.name}`.toLowerCase().includes(nameFilter.trim().toLowerCase())
@@ -43,6 +44,19 @@ export default function Home() {
     formData.expiryDate &&
     formData.expiryDate < formData.manufacturingDate
   );
+
+  useEffect(() => {
+    if (!deleteTarget) return undefined;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDeleteTarget(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [deleteTarget]);
 
   // ฟังก์ชันบันทึกข้อมูล (ใช้ได้ทั้งเพิ่มและแก้ไข)
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -77,6 +91,19 @@ export default function Home() {
   const closeForm = () => {
     setShowForm(false);
     setFormData(emptyFormData);
+  };
+
+  const openDeletePopup = (product: Product) => {
+    setDeleteTarget({
+      id: product.id,
+      label: `[${product.sku}] ${product.name}`,
+    });
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setProducts(prevProducts => prevProducts.filter(product => product.id !== deleteTarget.id));
+    setDeleteTarget(null);
   };
 
   return (
@@ -182,7 +209,7 @@ export default function Home() {
               <button onClick={() => { setFormData(product); setShowForm(true); }} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                 <Edit size={16} />
               </button>
-              <button onClick={() => { if (window.confirm('ยืนยันลบสินค้านี้ใช่หรือไม่?')) setProducts(products.filter(p => p.id !== product.id)) }} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+              <button onClick={() => openDeletePopup(product)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
                 <Trash2 size={16} />
               </button>
             </div>
@@ -195,6 +222,44 @@ export default function Home() {
           <div className="text-center text-gray-500 py-8 text-sm">ไม่พบสินค้าที่ตรงกับคำค้นหา</div>
         )}
       </div>
+
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 px-4 backdrop-blur-[2px]"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setDeleteTarget(null);
+            }
+          }}
+        >
+          <div className="w-full max-w-sm rounded-2xl border border-rose-100 bg-white p-5 shadow-2xl">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-100">
+              <AlertTriangle size={30} className="text-rose-600" />
+            </div>
+            <h4 className="text-center text-lg font-semibold text-slate-800">ยืนยันการลบสินค้า</h4>
+            <p className="mt-1 text-center text-sm text-slate-500">
+              รายการ <span className="font-medium text-slate-700">{deleteTarget.label}</span> จะถูกลบออกจากระบบ
+            </p>
+            <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
+              >
+                ลบสินค้า
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
