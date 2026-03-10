@@ -2,9 +2,42 @@
 import type { MovementLog, Product, User } from '../types';
 
 export const initialProducts: Product[] = [
-  { id: 1, name: "กล่องพัสดุ Size A", sku: "MWH-04-A-02-01", stock: 150 },
-  { id: 2, name: "เทปกาวใส 2 นิ้ว", sku: "MWH-04-A-02-01", stock: 300 },
-  { id: 3, name: "บับเบิ้ลกันกระแทก", sku: "MWH-04-A-03-01", stock: 20 },
+  {
+    id: 1,
+    name: "กล่องพัสดุ Size A",
+    sku: "PRD-BOX-A-001",
+    binLocation: "MWH-04-A-02-01",
+    documentNo: "PO-2026-0001",
+    unit: "ชิ้น",
+    lotNo: "LOT-A2601",
+    manufacturingDate: "2025-12-15",
+    expiryDate: "2027-12-15",
+    stock: 150
+  },
+  {
+    id: 2,
+    name: "เทปกาวใส 2 นิ้ว",
+    sku: "PRD-TAPE-002",
+    binLocation: "MWH-04-B-01-01",
+    documentNo: "PO-2026-0002",
+    unit: "ม้วน",
+    lotNo: "LOT-T2602",
+    manufacturingDate: "2026-01-10",
+    expiryDate: "2028-01-10",
+    stock: 300
+  },
+  {
+    id: 3,
+    name: "บับเบิ้ลกันกระแทก",
+    sku: "PRD-BUBBLE-003",
+    binLocation: "MWH-04-A-03-01",
+    documentNo: "PO-2026-0003",
+    unit: "ม้วน",
+    lotNo: "LOT-B2603",
+    manufacturingDate: "2026-02-01",
+    expiryDate: "2028-02-01",
+    stock: 20
+  },
 ];
 
 //TODO จำลอง Location ที่จัดเก็บ (เช่น Rack, Zone)

@@ -5,33 +5,70 @@ import { useOutletContext } from 'react-router-dom';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import type { AppOutletContext, Product } from '../types';
 
-interface ProductFormData {
+interface ProductFormData extends Omit<Product, 'id'> {
   id: number | null;
-  name: string;
-  sku: string;
-  stock: number;
 }
+
+const emptyFormData: ProductFormData = {
+  id: null,
+  name: '',
+  sku: '',
+  binLocation: '',
+  documentNo: '',
+  unit: '',
+  lotNo: '',
+  manufacturingDate: '',
+  expiryDate: '',
+  stock: 0,
+};
 
 export default function Home() {
   // ดึงข้อมูลสินค้ามาจาก Layout
   const { products, setProducts } = useOutletContext<AppOutletContext>();
   const [showForm, setShowForm] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
-  const [formData, setFormData] = useState<ProductFormData>({ id: null, name: '', sku: '', stock: 0 });
+  const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
   const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(nameFilter.trim().toLowerCase())
+    `${product.sku} ${product.name}`.toLowerCase().includes(nameFilter.trim().toLowerCase())
+  );
+
+  const formatDate = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('th-TH');
+  };
+
+  const isInvalidDateRange = Boolean(
+    formData.manufacturingDate &&
+    formData.expiryDate &&
+    formData.expiryDate < formData.manufacturingDate
   );
 
   // ฟังก์ชันบันทึกข้อมูล (ใช้ได้ทั้งเพิ่มและแก้ไข)
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const normalizedData = {
+      ...formData,
+      name: formData.name.trim(),
+      sku: formData.sku.trim(),
+      binLocation: formData.binLocation.trim(),
+      documentNo: formData.documentNo.trim(),
+      unit: formData.unit.trim(),
+      lotNo: formData.lotNo.trim(),
+      stock: Number(formData.stock) || 0,
+    };
+
+    if (isInvalidDateRange) {
+      return;
+    }
+
     if (formData.id !== null) {
       // กรณีแก้ไข
-      const updatedProduct: Product = { ...formData, id: formData.id, stock: Number(formData.stock) };
+      const updatedProduct: Product = { ...normalizedData, id: formData.id };
       setProducts(products.map(p => p.id === formData.id ? updatedProduct : p));
     } else {
       // กรณีเพิ่มใหม่
-      const newProduct: Product = { ...formData, id: Date.now(), stock: Number(formData.stock) };
+      const newProduct: Product = { ...normalizedData, id: Date.now() };
       setProducts([...products, newProduct]);
     }
     closeForm();
@@ -39,7 +76,7 @@ export default function Home() {
 
   const closeForm = () => {
     setShowForm(false);
-    setFormData({ id: null, name: '', sku: '', stock: 0 });
+    setFormData(emptyFormData);
   };
 
   return (
@@ -47,7 +84,10 @@ export default function Home() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <h2 className="text-lg font-semibold text-gray-800">รายการสินค้า</h2>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setFormData(emptyFormData);
+            setShowForm(true);
+          }}
           className="bg-primary-600 text-white px-3 py-2 rounded-lg flex items-center justify-center gap-1 text-sm shadow-sm hover:bg-primary-700 transition-colors w-full sm:w-auto"
         >
           <Plus size={16} /> เพิ่มสินค้า
@@ -61,20 +101,45 @@ export default function Home() {
             <h3 className="font-medium text-primary-700">{formData.id ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}</h3>
             <button onClick={closeForm} className="text-gray-400 hover:text-red-500"><X size={20} /></button>
           </div>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">รหัสสินค้า (SKU)</label>
+              <label className="block text-xs text-gray-500 mb-1">รหัสสินค้า</label>
               <input type="text" required value={formData.sku} onChange={e => setFormData({ ...formData, sku: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
               <label className="block text-xs text-gray-500 mb-1">ชื่อสินค้า</label>
               <input type="text" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
-            {/* <div>
-              <label className="block text-xs text-gray-500 mb-1">จำนวนตั้งต้น</label>
-              <input type="number" required min="0" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
-            </div> */}
-            <button type="submit" className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors sm:col-span-2">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Bin Location</label>
+              <input type="text" required value={formData.binLocation} onChange={e => setFormData({ ...formData, binLocation: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">เลขที่เอกสาร</label>
+              <input type="text" required value={formData.documentNo} onChange={e => setFormData({ ...formData, documentNo: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">หน่วย</label>
+              <input type="text" required value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Lot No.</label>
+              <input type="text" required value={formData.lotNo} onChange={e => setFormData({ ...formData, lotNo: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">วันที่ผลิต</label>
+              <input type="date" required value={formData.manufacturingDate} onChange={e => setFormData({ ...formData, manufacturingDate: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">วันหมดอายุ</label>
+              <input type="date" required min={formData.manufacturingDate || undefined} value={formData.expiryDate} onChange={e => setFormData({ ...formData, expiryDate: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white" />
+            </div>
+            {isInvalidDateRange && (
+              <div className="text-xs text-red-600 sm:col-span-2 lg:col-span-3">
+                วันหมดอายุต้องไม่น้อยกว่าวันที่ผลิต
+              </div>
+            )}
+            <button type="submit" disabled={isInvalidDateRange} className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed sm:col-span-2 lg:col-span-3">
               บันทึกข้อมูล
             </button>
           </form>
@@ -100,9 +165,18 @@ export default function Home() {
         {filteredProducts.map((product: Product) => (
           <div key={product.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:justify-between sm:items-center items-start gap-3">
             <div>
-              <div className="text-xs text-primary-600 font-semibold mb-0.5">{product.sku}</div>
+              <div className="text-xs text-primary-600 font-semibold mb-0.5">รหัสสินค้า: {product.sku}</div>
               <div className="font-medium text-gray-800 leading-tight">{product.name}</div>
-              <div className="text-sm text-gray-500 mt-1">คงเหลือ: <span className="font-semibold text-gray-800">{product.stock}</span></div>
+              <div className="text-sm text-gray-500 mt-1">
+                คงเหลือ: <span className="font-semibold text-gray-800">{product.stock}</span> {product.unit}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+                <div>Bin Location: <span className="text-gray-700">{product.binLocation}</span></div>
+                <div>เลขที่เอกสาร: <span className="text-gray-700">{product.documentNo}</span></div>
+                <div>Lot No.: <span className="text-gray-700">{product.lotNo}</span></div>
+                <div>วันที่ผลิต: <span className="text-gray-700">{formatDate(product.manufacturingDate)}</span></div>
+                <div>วันหมดอายุ: <span className="text-gray-700">{formatDate(product.expiryDate)}</span></div>
+              </div>
             </div>
             <div className="flex gap-2 self-end sm:self-auto">
               <button onClick={() => { setFormData(product); setShowForm(true); }} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">

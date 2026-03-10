@@ -7,6 +7,12 @@ export interface Product {
     id: number;
     name: string;
     sku: string;
+    binLocation: string;
+    documentNo: string;
+    unit: string;
+    lotNo: string;
+    manufacturingDate: string;
+    expiryDate: string;
     stock: number;
 }
 
