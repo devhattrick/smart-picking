@@ -90,7 +90,7 @@ export default function Login({ setUser }: LoginProps) {
         </div>
 
         <div className="mt-6 text-center text-xs text-gray-400">
-          <p>Version: 1.0.4</p>
+          <p>Version Demo: 1.0.4</p>
 
         </div>
       </div>
