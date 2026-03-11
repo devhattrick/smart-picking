@@ -1,7 +1,7 @@
 // src/pages/History.tsx
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { ArrowDownRight, ArrowUpRight, Clock, MapPin, User } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Clock, FileSpreadsheet, MapPin, User } from 'lucide-react';
 import type { AppOutletContext, MovementType } from '../types';
 
 export default function History() {
@@ -12,6 +12,7 @@ export default function History() {
     const [personFilter, setPersonFilter] = useState('');
     const [productNameFilter, setProductNameFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState<'ALL' | MovementType>('ALL');
+    const [isExporting, setIsExporting] = useState(false);
 
     const productNameOptions = useMemo(() => {
         const names = Array.from(
@@ -88,6 +89,54 @@ export default function History() {
     }, [history, products, startDateFilter, endDateFilter, locationFilter, personFilter, productNameFilter, typeFilter, isInvalidDateRange]);
 
     const hasActiveFilter = Boolean(startDateFilter || endDateFilter || locationFilter || personFilter || productNameFilter || typeFilter !== 'ALL');
+
+    const handleExportExcel = async () => {
+        if (filteredHistory.length === 0 || isExporting) return;
+
+        setIsExporting(true);
+        try {
+            const XLSX = await import('xlsx');
+            const rows = filteredHistory.map((log, index) => {
+                const product = products.find((p) => p.id === log.productId);
+                return {
+                    'ลำดับ': index + 1,
+                    'วันที่เวลา': formatDateTime(log.timestamp),
+                    'ประเภท': log.type === 'IN' ? 'นำเข้า' : 'เบิกออก',
+                    'SKU': product?.sku ?? '-',
+                    'ชื่อสินค้า': product?.name ?? 'ไม่พบข้อมูลสินค้า (อาจถูกลบ)',
+                    'จำนวน': log.quantity,
+                    'Location': log.location,
+                    'Person': log.person,
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(rows);
+            worksheet['!cols'] = [
+                { wch: 8 },
+                { wch: 24 },
+                { wch: 12 },
+                { wch: 16 },
+                { wch: 36 },
+                { wch: 10 },
+                { wch: 24 },
+                { wch: 20 },
+            ];
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'History');
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            XLSX.writeFile(workbook, `history-${year}${month}${day}.xlsx`);
+        } catch (error) {
+            console.error('Failed to export history excel', error);
+            window.alert('ไม่สามารถสร้างไฟล์ Excel ได้ กรุณาลองใหม่อีกครั้ง');
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     return (
         <div className="animate-in fade-in duration-300">
@@ -179,7 +228,16 @@ export default function History() {
                     </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex flex-wrap justify-end gap-3">
+                    <button
+                        type="button"
+                        onClick={handleExportExcel}
+                        disabled={filteredHistory.length === 0 || isExporting}
+                        className="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                    >
+                        <FileSpreadsheet size={14} className="mr-1.5" />
+                        {isExporting ? 'กำลังสร้างไฟล์...' : 'Gen Excel'}
+                    </button>
                     <button
                         type="button"
                         onClick={() => {
