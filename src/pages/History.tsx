@@ -13,6 +13,30 @@ export default function History() {
     const [productNameFilter, setProductNameFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState<'ALL' | MovementType>('ALL');
 
+    const productNameOptions = useMemo(() => {
+        const names = Array.from(
+            new Set(
+                products
+                    .map((product) => product.name.trim())
+                    .filter(Boolean)
+            )
+        );
+
+        return names.sort((a, b) => a.localeCompare(b, 'th-TH'));
+    }, [products]);
+
+    const locationOptions = useMemo(() => {
+        const locations = Array.from(
+            new Set(
+                [...products.map((product) => product.binLocation), ...history.map((log) => log.location)]
+                    .map((value) => value.trim())
+                    .filter(Boolean)
+            )
+        );
+
+        return locations.sort((a, b) => a.localeCompare(b, 'th-TH'));
+    }, [products, history]);
+
     // ฟังก์ชันช่วยหาชื่อและ SKU สินค้าจาก ID
     const getProductDetails = (productId: number) => {
         const product = products.find(p => p.id === productId);
@@ -119,21 +143,29 @@ export default function History() {
                         <label className="block text-xs text-gray-500 mb-1">ชื่อสินค้า</label>
                         <input
                             type="text"
+                            list="history-product-name-list"
                             value={productNameFilter}
                             onChange={(e) => setProductNameFilter(e.target.value)}
-                            placeholder="เช่น กล่องพัสดุ"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="เลือกหรือพิมพ์ชื่อสินค้า..."
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                         />
+                        <datalist id="history-product-name-list">
+                            {productNameOptions.map((name) => <option key={name} value={name} />)}
+                        </datalist>
                     </div>
                     <div>
                         <label className="block text-xs text-gray-500 mb-1">Location</label>
                         <input
                             type="text"
+                            list="history-location-list"
                             value={locationFilter}
                             onChange={(e) => setLocationFilter(e.target.value)}
-                            placeholder="เช่น MWH-04-A-02-01"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="เลือกหรือพิมพ์ Location..."
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
                         />
+                        <datalist id="history-location-list">
+                            {locationOptions.map((location) => <option key={location} value={location} />)}
+                        </datalist>
                     </div>
                     <div>
                         <label className="block text-xs text-gray-500 mb-1">Person</label>
