@@ -8,6 +8,7 @@ export const initialProducts: Product[] = [
     sku: "PRD-BOX-A-001",
     binLocation: "MWH-04-A-02-01",
     documentNo: "PO-2026-0001",
+    soNo: "SO-2026-1001",
     unit: "ชิ้น",
     lotNo: "LOT-A2601",
     manufacturingDate: "2025-12-15",
@@ -20,6 +21,7 @@ export const initialProducts: Product[] = [
     sku: "PRD-TAPE-002",
     binLocation: "MWH-04-B-01-01",
     documentNo: "PO-2026-0002",
+    soNo: "SO-2026-1002",
     unit: "ม้วน",
     lotNo: "LOT-T2602",
     manufacturingDate: "2026-01-10",
@@ -32,11 +34,25 @@ export const initialProducts: Product[] = [
     sku: "PRD-BUBBLE-003",
     binLocation: "MWH-04-A-03-01",
     documentNo: "PO-2026-0003",
+    soNo: "SO-2026-1003",
     unit: "ม้วน",
     lotNo: "LOT-B2603",
     manufacturingDate: "2026-02-01",
     expiryDate: "2028-02-01",
     stock: 20
+  },
+  {
+    id: 4,
+    name: "ซองเอกสารกันน้ำ",
+    sku: "PRD-ENVELOPE-004",
+    binLocation: "MWH-04-D-03-01",
+    documentNo: "PO-2026-0004",
+    soNo: "SO-2026-1004",
+    unit: "แพ็ค",
+    lotNo: "LOT-E2604",
+    manufacturingDate: "2026-02-18",
+    expiryDate: "2028-02-18",
+    stock: 90
   },
 ];
 

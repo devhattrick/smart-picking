@@ -9,6 +9,7 @@ export interface Product {
     sku: string;
     binLocation: string;
     documentNo: string;
+    soNo: string;
     unit: string;
     lotNo: string;
     manufacturingDate: string;

@@ -41,7 +41,7 @@ export default function History() {
     // ฟังก์ชันช่วยหาชื่อและ SKU สินค้าจาก ID
     const getProductDetails = (productId: number) => {
         const product = products.find(p => p.id === productId);
-        return product ? `[${product.sku}] ${product.name}` : 'ไม่พบข้อมูลสินค้า (อาจถูกลบ)';
+        return product ? `[${product.sku}] ${product.name} | SO: ${product.soNo}` : 'ไม่พบข้อมูลสินค้า (อาจถูกลบ)';
     };
 
     // ฟังก์ชันแปลงวันที่ให้ดูอ่านง่าย (ภาษาไทย)
@@ -103,6 +103,7 @@ export default function History() {
                     'วันที่เวลา': formatDateTime(log.timestamp),
                     'ประเภท': log.type === 'IN' ? 'นำเข้า' : 'เบิกออก',
                     'SKU': product?.sku ?? '-',
+                    'SO No.': product?.soNo ?? '-',
                     'ชื่อสินค้า': product?.name ?? 'ไม่พบข้อมูลสินค้า (อาจถูกลบ)',
                     'จำนวน': log.quantity,
                     'Location': log.location,
@@ -115,6 +116,7 @@ export default function History() {
                 { wch: 8 },
                 { wch: 24 },
                 { wch: 12 },
+                { wch: 16 },
                 { wch: 16 },
                 { wch: 36 },
                 { wch: 10 },

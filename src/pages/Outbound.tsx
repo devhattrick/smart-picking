@@ -105,7 +105,7 @@ export default function Outbound() {
                     <select required value={formData.productId} onChange={e => setFormData({ ...formData, productId: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 bg-white">
                         <option value="">-- กรุณาเลือกสินค้า --</option>
                         {products.map(p => (
-                            <option key={p.id} value={p.id}>[{p.sku}] {p.name} (เหลือ: {p.stock})</option>
+                            <option key={p.id} value={p.id}>[{p.sku}] {p.name} | SO: {p.soNo} (เหลือ: {p.stock})</option>
                         ))}
                     </select>
                 </div>

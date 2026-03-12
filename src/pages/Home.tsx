@@ -15,6 +15,7 @@ const emptyFormData: ProductFormData = {
   sku: '',
   binLocation: '',
   documentNo: '',
+  soNo: '',
   unit: '',
   lotNo: '',
   manufacturingDate: '',
@@ -30,7 +31,7 @@ export default function Home() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
   const filteredProducts = products.filter((product) =>
-    `${product.sku} ${product.name}`.toLowerCase().includes(nameFilter.trim().toLowerCase())
+    `${product.sku} ${product.soNo} ${product.name}`.toLowerCase().includes(nameFilter.trim().toLowerCase())
   );
 
   const formatDate = (value: string) => {
@@ -67,6 +68,7 @@ export default function Home() {
       sku: formData.sku.trim(),
       binLocation: formData.binLocation.trim(),
       documentNo: formData.documentNo.trim(),
+      soNo: formData.soNo.trim(),
       unit: formData.unit.trim(),
       lotNo: formData.lotNo.trim(),
       stock: Number(formData.stock) || 0,
@@ -146,6 +148,10 @@ export default function Home() {
               <input type="text" required value={formData.documentNo} onChange={e => setFormData({ ...formData, documentNo: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
             <div>
+              <label className="block text-xs text-gray-500 mb-1">SO No.</label>
+              <input type="text" required value={formData.soNo} onChange={e => setFormData({ ...formData, soNo: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            </div>
+            <div>
               <label className="block text-xs text-gray-500 mb-1">หน่วย</label>
               <input type="text" required value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" />
             </div>
@@ -177,14 +183,14 @@ export default function Home() {
       <div className="space-y-3 pb-4">
         <div className="bg-white p-3 rounded-xl border border-gray-100">
           <label htmlFor="product-name-filter" className="block text-xs text-gray-500 mb-1">
-            ค้นหาชื่อสินค้า
+            ค้นหา SKU / SO No. / ชื่อสินค้า
           </label>
           <input
             id="product-name-filter"
             type="text"
             value={nameFilter}
             onChange={(e) => setNameFilter(e.target.value)}
-            placeholder="พิมพ์ชื่อสินค้า..."
+            placeholder="พิมพ์ SKU, SO No. หรือชื่อสินค้า..."
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
@@ -200,6 +206,7 @@ export default function Home() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
                 <div>Bin Location: <span className="text-gray-700">{product.binLocation}</span></div>
                 <div>เลขที่เอกสาร: <span className="text-gray-700">{product.documentNo}</span></div>
+                <div>SO No.: <span className="text-gray-700">{product.soNo}</span></div>
                 <div>Lot No.: <span className="text-gray-700">{product.lotNo}</span></div>
                 <div>วันที่ผลิต: <span className="text-gray-700">{formatDate(product.manufacturingDate)}</span></div>
                 <div>วันหมดอายุ: <span className="text-gray-700">{formatDate(product.expiryDate)}</span></div>
