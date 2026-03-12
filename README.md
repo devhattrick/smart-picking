@@ -1,16 +1,62 @@
-# React + Vite
+# Smart Picking System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web application for warehouse picking/inventory flow management with role-based access (`admin`, `employee`).
 
-Currently, two official plugins are available:
+## Web App
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Production URL: https://devhattrick.github.io/smart-picking/login
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + TypeScript
+- Vite 7
+- React Router
+- Tailwind CSS
+- Recharts
+- XLSX (Excel export)
 
-## Expanding the ESLint configuration
+## How to Setup and Run
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Prerequisites
+
+- Node.js `20.19+` (recommended: latest LTS)
+- npm `10+`
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Run in development
+
+```bash
+npm run dev
+```
+
+Then open the local URL shown in terminal (usually `http://localhost:5173`).
+
+### 4. Build for production
+
+```bash
+npm run build
+```
+
+### 5. Preview production build
+
+```bash
+npm run preview
+```
+
+## Available Scripts
+
+- `npm run dev` - start dev server
+- `npm run build` - build app to `dist/`
+- `npm run preview` - preview production build
+- `npm run typecheck` - run TypeScript check
+- `npm run lint` - run ESLint
+
+## Demo Accounts
+
+- Admin: `admin / password`
+- Employee: `emp / password`
