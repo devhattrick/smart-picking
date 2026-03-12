@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Package, ArrowDownToLine, ArrowUpFromLine, ClipboardList, LayoutDashboard, LogOut } from 'lucide-react';
+import { Package, ArrowDownToLine, ArrowUpFromLine, ClipboardList, LayoutDashboard, LogOut, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LayoutProps, UserRole } from '../types';
 
@@ -12,12 +13,26 @@ interface NavItem {
 
 export default function Layout({ products, setProducts, history, setHistory, user, setUser }: LayoutProps) {
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
     navigate('/login');
   };
+
+  useEffect(() => {
+    if (!showLogoutConfirm) return undefined;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowLogoutConfirm(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showLogoutConfirm]);
 
   //* ปรับ Permission การมองเห็น Page ที่ Role ['admin', 'employee']
   const allNavItems: NavItem[] = [
@@ -38,7 +53,7 @@ export default function Layout({ products, setProducts, history, setHistory, use
             <span className="text-yellow-400">LSMA4 </span>
             Picking System
           </h1>
-          <button onClick={handleLogout} className="text-white hover:text-red-200 transition-colors p-1" title="ออกจากระบบ">
+          <button onClick={() => setShowLogoutConfirm(true)} className="text-white hover:text-red-200 transition-colors p-1" title="ออกจากระบบ">
             <LogOut size={20} />
           </button>
         </div>
@@ -66,6 +81,42 @@ export default function Layout({ products, setProducts, history, setHistory, use
           ))}
         </div>
       </nav>
+
+      {showLogoutConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 px-4 backdrop-blur-[2px]"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setShowLogoutConfirm(false);
+            }
+          }}
+        >
+          <div className="w-full max-w-sm rounded-2xl border border-rose-100 bg-white p-5 shadow-2xl" role="dialog" aria-modal="true" aria-label="ยืนยันการออกจากระบบ">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-100">
+              <AlertTriangle size={30} className="text-rose-600" />
+            </div>
+            <h4 className="text-center text-lg font-semibold text-slate-800">ยืนยันการออกจากระบบ</h4>
+            <p className="mt-1 text-center text-sm text-slate-500">คุณต้องการออกจากระบบตอนนี้ใช่หรือไม่</p>
+            <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
+              >
+                ออกจากระบบ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
