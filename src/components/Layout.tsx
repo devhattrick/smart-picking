@@ -40,7 +40,7 @@ export default function Layout({ products, setProducts, history, setHistory, use
     { path: '/products', name: 'สินค้า', icon: <Package size={24} />, roles: ['admin'] },
     { path: '/inbound', name: 'นำเข้า', icon: <ArrowDownToLine size={24} />, roles: ['admin', 'employee'] },
     { path: '/outbound', name: 'เบิกออก', icon: <ArrowUpFromLine size={24} />, roles: ['admin', 'employee'] },
-    { path: '/history', name: 'ประวัติ', icon: <ClipboardList size={24} />, roles: ['admin', 'employee'] },
+    { path: '/login', name: 'ประวัติ', icon: <ClipboardList size={24} />, roles: ['admin', 'employee'] },
   ];
 
   const navItems = allNavItems.filter(item => (user ? item.roles.includes(user.role) : false));
