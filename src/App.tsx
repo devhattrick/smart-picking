@@ -8,6 +8,7 @@ import Outbound from './pages/Outbound';
 import History from './pages/History';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import Errorpage from './pages/Errorpage';
 import { initialProducts, initialHistory } from './data/mockData';
 import type { User } from './types';
 
@@ -33,15 +34,18 @@ function App() {
     <BrowserRouter basename={routerBase}>
       <Routes>
         <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login setUser={setUser} />} />
+        <Route path="/error" element={<Errorpage />} />
 
-        <Route path="/" element={user ? <Layout products={products} setProducts={setProducts} history={history} setHistory={setHistory} user={user} setUser={setUser} /> : <Navigate to="/login" replace />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="products" element={user?.role === 'admin' ? <Home /> : <Navigate to="/dashboard" replace />} />
-          <Route path="inbound" element={<Inbound />} />
-          <Route path="outbound" element={<Outbound />} />
-          <Route path="history" element={<History />} />
+        <Route element={user ? <Layout products={products} setProducts={setProducts} history={history} setHistory={setHistory} user={user} setUser={setUser} /> : <Navigate to="/login" replace />}>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/products" element={user?.role === 'admin' ? <Home /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/inbound" element={<Inbound />} />
+          <Route path="/outbound" element={<Outbound />} />
+          <Route path="/history" element={<History />} />
         </Route>
+
+        <Route path="*" element={<Errorpage />} />
       </Routes>
     </BrowserRouter>
   );

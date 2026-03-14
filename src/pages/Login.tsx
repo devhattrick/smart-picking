@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Dispatch, FormEvent, SetStateAction } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { mockUsers } from '../data/mockData';
 import type { User } from '../types';
 
@@ -76,13 +76,20 @@ export default function Login({ setUser }: LoginProps) {
             />
           </div>
 
-          <button 
+          {/* <button 
             type="submit" 
             className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md mt-2"
           >
             เข้าสู่ระบบ
-          </button>
+          </button> */}
         </form>
+
+        <Link
+          to="/error"
+          className="bg-primary-600 mt-4 inline-flex w-full items-center justify-center rounded-xl  px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+        >
+          เข้าสู่ระบบ
+        </Link>
         
         <div className="mt-6 text-center text-xs text-gray-400">
           <p>Admin: admin / password</p>
