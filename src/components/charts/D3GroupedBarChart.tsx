@@ -22,13 +22,13 @@ interface ChartRow extends GroupedBarChartDatum {
 }
 
 interface BarTooltipState {
+    id: string;
     x: number;
     y: number;
     name: string;
     sku: string;
-    seriesLabel: string;
-    value: number;
-    color: string;
+    inbound: number;
+    outbound: number;
 }
 
 const numberFormatter = new Intl.NumberFormat('th-TH');
@@ -119,6 +119,8 @@ export default function D3GroupedBarChart({ data }: { data: GroupedBarChartDatum
                                 const groupX = xScale(row.id);
                                 if (groupX === undefined) return null;
 
+                                const isActiveRow = tooltip?.id === row.id;
+
                                 return (
                                     <g key={row.id} transform={`translate(${groupX}, 0)`}>
                                         {movementSeries.map((series) => {
@@ -138,27 +140,36 @@ export default function D3GroupedBarChart({ data }: { data: GroupedBarChartDatum
                                                     height={Math.max(barHeight, 0)}
                                                     rx={6}
                                                     fill={series.color}
-                                                    className="transition-opacity duration-150 hover:opacity-90"
-                                                    onMouseMove={(event) => {
-                                                        const bounds = event.currentTarget.ownerSVGElement?.getBoundingClientRect();
-                                                        if (!bounds) return;
-
-                                                        setTooltip({
-                                                            x: event.clientX - bounds.left,
-                                                            y: event.clientY - bounds.top,
-                                                            name: row.name,
-                                                            sku: row.sku,
-                                                            seriesLabel: series.label,
-                                                            value,
-                                                            color: series.color,
-                                                        });
-                                                    }}
-                                                    onMouseLeave={() => {
-                                                        setTooltip(null);
-                                                    }}
+                                                    opacity={tooltip ? (isActiveRow ? 1 : 0.45) : 1}
+                                                    className="transition-opacity duration-150"
                                                 />
                                             );
                                         })}
+
+                                        <rect
+                                            x={0}
+                                            y={0}
+                                            width={xScale.bandwidth()}
+                                            height={innerHeight}
+                                            fill="transparent"
+                                            onMouseMove={(event) => {
+                                                const bounds = event.currentTarget.ownerSVGElement?.getBoundingClientRect();
+                                                if (!bounds) return;
+
+                                                setTooltip({
+                                                    id: row.id,
+                                                    x: event.clientX - bounds.left,
+                                                    y: event.clientY - bounds.top,
+                                                    name: row.name,
+                                                    sku: row.sku,
+                                                    inbound: row.inbound,
+                                                    outbound: row.outbound,
+                                                });
+                                            }}
+                                            onMouseLeave={() => {
+                                                setTooltip(null);
+                                            }}
+                                        />
 
                                         <text
                                             x={xScale.bandwidth() / 2}
@@ -187,15 +198,21 @@ export default function D3GroupedBarChart({ data }: { data: GroupedBarChartDatum
                             <div className="mb-1 font-medium text-white">
                                 [{tooltip.sku}] {tooltip.name}
                             </div>
-                            <div className="mb-1 flex items-center gap-2 text-slate-200">
-                                <span
-                                    className="h-2.5 w-2.5 rounded-full"
-                                    style={{ backgroundColor: tooltip.color }}
-                                />
-                                <span>{tooltip.seriesLabel}</span>
-                            </div>
-                            <div className="text-slate-200">
-                                {numberFormatter.format(tooltip.value)} ชิ้น
+                            <div className="space-y-1 text-slate-200">
+                                {movementSeries.map((series) => (
+                                    <div key={series.key} className="flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="h-2.5 w-2.5 rounded-full"
+                                                style={{ backgroundColor: series.color }}
+                                            />
+                                            <span>{series.label}</span>
+                                        </div>
+                                        <span className="font-medium text-white">
+                                            {numberFormatter.format(tooltip[series.key])} ชิ้น
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     ) : null}
