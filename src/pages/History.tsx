@@ -231,7 +231,7 @@ export default function History() {
                 </div>
 
                 <div className="flex flex-wrap justify-end gap-3">
-                    {/* <button
+                    <button
                         type="button"
                         onClick={handleExportExcel}
                         disabled={filteredHistory.length === 0 || isExporting}
@@ -239,7 +239,7 @@ export default function History() {
                     >
                         <FileSpreadsheet size={14} className="mr-1.5" />
                         {isExporting ? 'กำลังสร้างไฟล์...' : 'Gen Excel'}
-                    </button> */}
+                    </button>
                     <button
                         type="button"
                         onClick={() => {

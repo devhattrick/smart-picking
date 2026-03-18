@@ -40,7 +40,8 @@ export default function Login({ setUser }: LoginProps) {
 
       <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-white/70 backdrop-blur-sm p-6 sm:p-8 rounded-2xl shadow-xl border border-white/40">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2"><span className="text-amber-300 drop-shadow-lg">LSMA4 </span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2">
+            <span className="text-amber-300 drop-shadow-lg">LSMA4 </span>
             Picking System</h1>
           <p className="text-gray-500 text-sm drop-shadow-md mt-2">เข้าสู่ระบบเพื่อใช้งาน</p>
         </div>
@@ -76,20 +77,20 @@ export default function Login({ setUser }: LoginProps) {
             />
           </div>
 
-          {/* <button 
+          <button 
             type="submit" 
             className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md mt-2"
           >
             เข้าสู่ระบบ
-          </button> */}
+          </button>
         </form>
 
-        <Link
+        {/* <Link
           to="/error"
           className="bg-primary-600 mt-4 inline-flex w-full items-center justify-center rounded-xl  px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-700"
         >
           เข้าสู่ระบบ
-        </Link>
+        </Link> */}
         
         <div className="mt-6 text-center text-xs text-gray-400">
           <p>Admin: admin / password</p>
