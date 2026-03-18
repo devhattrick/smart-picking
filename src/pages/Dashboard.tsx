@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Package, TrendingUp, TrendingDown, AlertCircle, BarChart3 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import D3DonutChart from '../components/charts/D3DonutChart';
+import D3GroupedBarChart, { movementSeries } from '../components/charts/D3GroupedBarChart';
 import type { AppOutletContext } from '../types';
 
 export default function Dashboard() {
@@ -154,19 +155,20 @@ export default function Dashboard() {
             {/* กราฟสถิติรวมนำเข้า-เบิกออกทั้งหมด */}
             <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-4 mt-2 mb-4">
                 <h3 className="font-semibold text-gray-800 text-sm mb-4">สถิติรวมนำเข้า-เบิกออกทั้งหมด</h3>
+                <div className="mb-3 flex flex-wrap gap-3 text-xs text-gray-600">
+                    {totalSummaryData.map((item) => (
+                        <div key={item.name} className="inline-flex items-center gap-2">
+                            <span
+                                className="h-2.5 w-2.5 rounded-full"
+                                style={{ backgroundColor: item.color }}
+                            />
+                            <span>{item.name}</span>
+                        </div>
+                    ))}
+                </div>
                 <div className="h-52 sm:h-56 w-full">
                     {totalSummaryData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} formatter={(value) => [`${value} ชิ้น`, 'จำนวน']} />
-                                <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
-                                <Pie data={totalSummaryData} dataKey="value" nameKey="name" cx="50%" cy="45%" outerRadius={65} innerRadius={35} paddingAngle={3}>
-                                    {totalSummaryData.map((entry) => (
-                                        <Cell key={entry.name} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <D3DonutChart data={totalSummaryData} />
                     ) : (
                         <div className="h-full w-full flex items-center justify-center text-gray-400 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
                             ยังไม่มีข้อมูลการทำรายการ
@@ -178,24 +180,20 @@ export default function Dashboard() {
             {/* กราฟสถิติการรับเข้า-เบิกออก */}
             <div className="bg-white rounded-xl shadow-sm border border-primary-100 p-4 mt-2">
                 <h3 className="font-semibold text-gray-800 text-sm mb-4">สถิติการรับเข้า-เบิกออก (ตาม SKU)</h3>
+                <div className="mb-3 flex flex-wrap gap-3 text-xs text-gray-600">
+                    {movementSeries.map((series) => (
+                        <div key={series.key} className="inline-flex items-center gap-2">
+                            <span
+                                className="h-2.5 w-2.5 rounded-full"
+                                style={{ backgroundColor: series.color }}
+                            />
+                            <span>{series.label}</span>
+                        </div>
+                    ))}
+                </div>
                 {chartData.length > 0 ? (
                     <div className="h-64 sm:h-72 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fontSize: 10, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                                <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} labelFormatter={(label, payload) => {
-                                    if (payload && payload.length > 0) {
-                                        return `สินค้า: ${payload[0].payload.name}`;
-                                    }
-                                    return `สินค้า: ${label}`;
-                                }} />
-                                <Legend wrapperStyle={{ fontSize: 12, paddingTop: '10px' }} />
-                                <Bar dataKey="inbound" name="นำเข้า (ชิ้น)" fill="#10B981" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="outbound" name="เบิกออก (ชิ้น)" fill="#F97316" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        <D3GroupedBarChart data={chartData} />
                     </div>
                 ) : (
                     <div className="h-32 w-full flex items-center justify-center text-gray-400 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
