@@ -1,9 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
 body {
   background-color: #f8fafc; /* พื้นหลังสีขาวอมเทานิดๆ ให้ดูสบายตา */
   margin: 0;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
