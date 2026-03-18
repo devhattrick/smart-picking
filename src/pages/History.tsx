@@ -265,7 +265,7 @@ export default function History() {
                     </div>
                 ) : (
                     filteredHistory.map((log) => {
-                        // กำหนดสีและไอคอนตามประเภท IN / OUT
+                        
                         const isIN = log.type === 'IN';
                         const typeColor = isIN ? 'text-primary-600 bg-primary-50 border-primary-100' : 'text-orange-600 bg-orange-50 border-orange-100';
                         const Icon = isIN ? ArrowDownRight : ArrowUpRight;

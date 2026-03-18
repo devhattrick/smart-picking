@@ -27,3 +27,20 @@ select,
 textarea {
   font: inherit;
 }
+
+input[type='date'] {
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 16px;
+  line-height: 1.25;
+  letter-spacing: normal;
+  min-height: 2.75rem;
+}
+
+input[type='date']::-webkit-date-and-time-value {
+  min-height: 1.25em;
+  text-align: left;
+}
+
+input[type='date']::-webkit-datetime-edit {
+  padding: 0;
+}

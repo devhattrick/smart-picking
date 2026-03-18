@@ -24,7 +24,7 @@ const emptyFormData: ProductFormData = {
 };
 
 export default function Home() {
-  // ดึงข้อมูลสินค้ามาจาก Layout
+  // pull data from Layout
   const { products, setProducts } = useOutletContext<AppOutletContext>();
   const [showForm, setShowForm] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
@@ -59,7 +59,7 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [deleteTarget]);
 
-  // ฟังก์ชันบันทึกข้อมูล (ใช้ได้ทั้งเพิ่มและแก้ไข)
+  // func (can use add/edit)
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const normalizedData = {
@@ -79,11 +79,11 @@ export default function Home() {
     }
 
     if (formData.id !== null) {
-      // กรณีแก้ไข
+      // Edit
       const updatedProduct: Product = { ...normalizedData, id: formData.id };
       setProducts(products.map(p => p.id === formData.id ? updatedProduct : p));
     } else {
-      // กรณีเพิ่มใหม่
+      // Add
       const newProduct: Product = { ...normalizedData, id: Date.now() };
       setProducts([...products, newProduct]);
     }
