@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Noto Sans Thai Looped', 'Noto Sans Thai', 'sans-serif'],
+        sans: ['Noto Sans Thai Looped', 'Noto Sans Thai'],
       },
       colors: {
         primary: {
