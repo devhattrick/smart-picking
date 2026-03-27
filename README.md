@@ -28,7 +28,26 @@ Web application for warehouse picking/inventory flow management with role-based 
 npm install
 ```
 
-### 3. Run in development
+### 3. Start backend API
+
+From `STDProject/picking-system-api`:
+
+```bash
+npm install
+npm run dev
+```
+
+Backend default URL: `http://localhost:3001`
+
+### 4. Configure frontend API URL
+
+Create `.env` from `.env.example` if you need a different backend URL.
+
+```bash
+VITE_API_BASE_URL=http://localhost:3001/api
+```
+
+### 5. Run in development
 
 ```bash
 npm run dev
@@ -36,13 +55,13 @@ npm run dev
 
 Then open the local URL shown in terminal (usually `http://localhost:5173`).
 
-### 4. Build for production
+### 6. Build for production
 
 ```bash
 npm run build
 ```
 
-### 5. Preview production build
+### 7. Preview production build
 
 ```bash
 npm run preview

@@ -1,8 +1,8 @@
-// src/pages/Home.tsx
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { AlertTriangle, Plus, Edit, Trash2, X } from 'lucide-react';
+import { pickingSystemService, type ProductPayload } from '../services/picking-system-service';
 import type { AppOutletContext, Product } from '../types';
 
 interface ProductFormData extends Omit<Product, 'id'> {
@@ -25,11 +25,14 @@ const emptyFormData: ProductFormData = {
 
 export default function Home() {
   // pull data from Layout
-  const { products, setProducts } = useOutletContext<AppOutletContext>();
+  const { products, setProducts, setLocations } = useOutletContext<AppOutletContext>();
   const [showForm, setShowForm] = useState(false);
   const [nameFilter, setNameFilter] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
+  const [formError, setFormError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const filteredProducts = products.filter((product) =>
     `${product.sku} ${product.soNo} ${product.name}`.toLowerCase().includes(nameFilter.trim().toLowerCase())
   );
@@ -60,8 +63,20 @@ export default function Home() {
   }, [deleteTarget]);
 
   // func (can use add/edit)
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const syncLocation = (location: string) => {
+    setLocations((currentLocations) => {
+      if (currentLocations.some((current) => current.toLowerCase() === location.toLowerCase())) {
+        return currentLocations;
+      }
+
+      return [...currentLocations, location].sort((left, right) => left.localeCompare(right, 'th-TH'));
+    });
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError('');
+
     const normalizedData = {
       ...formData,
       name: formData.name.trim(),
@@ -78,21 +93,46 @@ export default function Home() {
       return;
     }
 
-    if (formData.id !== null) {
-      // Edit
-      const updatedProduct: Product = { ...normalizedData, id: formData.id };
-      setProducts(products.map(p => p.id === formData.id ? updatedProduct : p));
-    } else {
-      // Add
-      const newProduct: Product = { ...normalizedData, id: Date.now() };
-      setProducts([...products, newProduct]);
+    const payload: ProductPayload = {
+      name: normalizedData.name,
+      sku: normalizedData.sku,
+      binLocation: normalizedData.binLocation,
+      documentNo: normalizedData.documentNo,
+      soNo: normalizedData.soNo,
+      unit: normalizedData.unit,
+      lotNo: normalizedData.lotNo,
+      manufacturingDate: normalizedData.manufacturingDate,
+      expiryDate: normalizedData.expiryDate,
+      stock: normalizedData.stock,
+    };
+
+    setIsSaving(true);
+
+    try {
+      if (formData.id !== null) {
+        const updatedProduct = await pickingSystemService.updateProduct(formData.id, payload);
+        setProducts((currentProducts) =>
+          currentProducts.map((product) => (product.id === updatedProduct.id ? updatedProduct : product))
+        );
+        syncLocation(updatedProduct.binLocation);
+      } else {
+        const newProduct = await pickingSystemService.createProduct(payload);
+        setProducts((currentProducts) => [...currentProducts, newProduct]);
+        syncLocation(newProduct.binLocation);
+      }
+
+      closeForm();
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'ไม่สามารถบันทึกสินค้าได้');
+    } finally {
+      setIsSaving(false);
     }
-    closeForm();
   };
 
   const closeForm = () => {
     setShowForm(false);
     setFormData(emptyFormData);
+    setFormError('');
   };
 
   const openDeletePopup = (product: Product) => {
@@ -102,10 +142,21 @@ export default function Home() {
     });
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    setProducts(prevProducts => prevProducts.filter(product => product.id !== deleteTarget.id));
-    setDeleteTarget(null);
+
+    setIsDeleting(true);
+    setFormError('');
+
+    try {
+      await pickingSystemService.deleteProduct(deleteTarget.id);
+      setProducts((prevProducts) => prevProducts.filter((product) => product.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'ไม่สามารถลบสินค้าได้');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -114,6 +165,7 @@ export default function Home() {
         <h2 className="text-lg font-semibold text-gray-800">รายการสินค้า</h2>
         <button
           onClick={() => {
+            setFormError('');
             setFormData(emptyFormData);
             setShowForm(true);
           }}
@@ -130,6 +182,11 @@ export default function Home() {
             <h3 className="font-medium text-primary-700">{formData.id ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่'}</h3>
             <button onClick={closeForm} className="text-gray-400 hover:text-red-500"><X size={20} /></button>
           </div>
+          {formError && (
+            <div className="mb-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              {formError}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs text-gray-500 mb-1">รหัสสินค้า</label>
@@ -172,10 +229,16 @@ export default function Home() {
                 วันหมดอายุต้องไม่น้อยกว่าวันที่ผลิต
               </div>
             )}
-            <button type="submit" disabled={isInvalidDateRange} className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed sm:col-span-2 lg:col-span-3">
-              บันทึกข้อมูล
+            <button type="submit" disabled={isInvalidDateRange || isSaving} className="w-full bg-primary-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed sm:col-span-2 lg:col-span-3">
+              {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
             </button>
           </form>
+        </div>
+      )}
+
+      {!showForm && formError && (
+        <div className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {formError}
         </div>
       )}
 
@@ -213,7 +276,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex gap-2 self-end sm:self-auto">
-              <button onClick={() => { setFormData(product); setShowForm(true); }} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+              <button onClick={() => { setFormError(''); setFormData(product); setShowForm(true); }} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
                 <Edit size={16} />
               </button>
               <button onClick={() => openDeletePopup(product)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
@@ -259,9 +322,10 @@ export default function Home() {
               <button
                 type="button"
                 onClick={confirmDelete}
-                className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
+                disabled={isDeleting}
+                className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:bg-rose-300"
               >
-                ลบสินค้า
+                {isDeleting ? 'กำลังลบ...' : 'ลบสินค้า'}
               </button>
             </div>
           </div>

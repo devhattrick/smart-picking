@@ -1,10 +1,9 @@
-// src/pages/Inbound.tsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { locations } from '../data/mockData';
 import ActionPopup from '../components/ActionPopup';
-import type { AppOutletContext, MovementLog } from '../types';
+import { pickingSystemService } from '../services/picking-system-service';
+import type { AppOutletContext } from '../types';
 
 type PopupType = 'success' | 'error';
 
@@ -24,14 +23,16 @@ interface PopupState {
 }
 
 export default function Inbound() {
-    const { products, setProducts, history, setHistory } = useOutletContext<AppOutletContext>();
+    const { products, setProducts, setHistory, locations, setLocations } = useOutletContext<AppOutletContext>();
+    const defaultLocation = locations[0] ?? '';
 
     const [formData, setFormData] = useState<InboundFormData>({
         productId: '',
         quantity: '',
-        location: locations[0],
+        location: '',
         person: ''
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [popup, setPopup] = useState<PopupState>({
         open: false,
         type: 'success',
@@ -48,7 +49,13 @@ export default function Inbound() {
         setPopup(prev => ({ ...prev, open: false }));
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        if (!formData.location && defaultLocation) {
+            setFormData((current) => ({ ...current, location: defaultLocation }));
+        }
+    }, [defaultLocation, formData.location]);
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const qty = Number(formData.quantity);
         const prodId = Number(formData.productId);
@@ -64,29 +71,33 @@ export default function Inbound() {
             return;
         }
 
-        // 1. เพิ่มสต๊อกสินค้า
-        setProducts(products.map(p =>
-            p.id === prodId ? { ...p, stock: p.stock + qty } : p
-        ));
+        setIsSubmitting(true);
 
-        // 2. บันทึกประวัติ
-        const newLog: MovementLog = {
-            id: Date.now(),
-            type: 'IN',
-            productId: prodId,
-            quantity: qty,
-            location: formData.location,
-            person: formData.person,
-            timestamp: new Date().toISOString(),
-        };
-        setHistory([newLog, ...history]);
+        try {
+            const result = await pickingSystemService.createInboundMovement({
+                productId: prodId,
+                quantity: qty,
+                location: formData.location.trim(),
+                person: formData.person.trim(),
+            });
 
-        showPopup(
-            'success',
-            'บันทึกการนำเข้าสำเร็จ',
-            `[${selectedProduct.sku}] ${selectedProduct.name} จำนวน ${qty} ชิ้น`
-        );
-        setFormData({ productId: '', quantity: '', location: locations[0], person: '' });
+            setProducts((currentProducts) =>
+                currentProducts.map((product) => (product.id === result.product.id ? result.product : product))
+            );
+            setHistory((currentHistory) => [result.movement, ...currentHistory]);
+            setLocations(result.locations);
+
+            showPopup(
+                'success',
+                'บันทึกการนำเข้าสำเร็จ',
+                `[${selectedProduct.sku}] ${selectedProduct.name} จำนวน ${qty} ชิ้น`
+            );
+            setFormData({ productId: '', quantity: '', location: result.locations[0] ?? '', person: '' });
+        } catch (error) {
+            showPopup('error', 'บันทึกไม่สำเร็จ', error instanceof Error ? error.message : 'ไม่สามารถบันทึกการนำเข้าได้');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -129,8 +140,8 @@ export default function Inbound() {
                     <input type="text" required value={formData.person} onChange={e => setFormData({ ...formData, person: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500" placeholder="ชื่อผู้ทำรายการ" />
                 </div>
 
-                <button type="submit" className="w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors mt-2 shadow-md md:col-span-2">
-                    บันทึกการนำเข้า
+                <button type="submit" disabled={isSubmitting || products.length === 0} className="w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors mt-2 shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed md:col-span-2">
+                    {isSubmitting ? 'กำลังบันทึก...' : 'บันทึกการนำเข้า'}
                 </button>
             </form>
 

@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Package, ArrowDownToLine, ArrowUpFromLine, ClipboardList, LayoutDashboard, LogOut, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { pickingSystemService } from '../services/picking-system-service';
 import type { LayoutProps, UserRole } from '../types';
 
 interface NavItem {
@@ -11,14 +12,32 @@ interface NavItem {
   roles: UserRole[];
 }
 
-export default function Layout({ products, setProducts, history, setHistory, user, setUser }: LayoutProps) {
+export default function Layout({
+  products,
+  setProducts,
+  history,
+  setHistory,
+  locations,
+  setLocations,
+  user,
+  setUser,
+  appDataStatus,
+}: LayoutProps) {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/login');
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      await pickingSystemService.logout();
+    } finally {
+      setUser(null);
+      setShowLogoutConfirm(false);
+      navigate('/login');
+      setIsLoggingOut(false);
+    }
   };
 
   useEffect(() => {
@@ -60,8 +79,27 @@ export default function Layout({ products, setProducts, history, setHistory, use
       </header>
 
       <main className="px-4 sm:px-6 lg:px-8 py-4 max-w-7xl mx-auto">
+        {appDataStatus.isLoadingInitialData && (
+          <div className="mb-4 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm text-sky-700">
+            กำลังโหลดข้อมูลล่าสุดจาก API...
+          </div>
+        )}
+
+        {appDataStatus.initialDataError && !appDataStatus.isLoadingInitialData && (
+          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:flex-row sm:items-center sm:justify-between">
+            <span>{appDataStatus.initialDataError}</span>
+            <button
+              type="button"
+              onClick={() => void appDataStatus.reloadAppData()}
+              className="rounded-xl bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-rose-700"
+            >
+              ลองโหลดใหม่
+            </button>
+          </div>
+        )}
+
         {/* ส่ง Context ให้หน้าลูกๆ เอาไปใช้งาน */}
-        <Outlet context={{ products, setProducts, history, setHistory, user }} />
+        <Outlet context={{ products, setProducts, history, setHistory, locations, setLocations, appDataStatus, user }} />
       </main>
 
       <nav className="fixed bottom-0 w-full bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-10">
@@ -109,9 +147,10 @@ export default function Layout({ products, setProducts, history, setHistory, use
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
+                disabled={isLoggingOut}
+                className="w-full rounded-xl bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:bg-rose-300"
               >
-                ออกจากระบบ
+                {isLoggingOut ? 'กำลังออกจากระบบ...' : 'ออกจากระบบ'}
               </button>
             </div>
           </div>

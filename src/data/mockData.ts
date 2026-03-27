@@ -1,5 +1,5 @@
 // src/data/mockData.ts
-import type { MovementLog, Product, User } from '../types';
+import type { MovementLog, Product } from '../types';
 
 export const initialProducts: Product[] = [
   {
@@ -401,9 +401,4 @@ export const initialHistory: MovementLog[] = [
     person: "สมชาย",
     timestamp: "2026-03-31T17:50:00+07:00",
   },
-];
-
-export const mockUsers: User[] = [
-  { id: 1, username: 'admin', password: 'password', role: 'admin', name: 'แอดมิน' },
-  { id: 2, username: 'emp', password: 'password', role: 'employee', name: 'พนักงาน' }
 ];

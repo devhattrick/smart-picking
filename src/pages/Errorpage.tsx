@@ -1,10 +1,11 @@
 import { AlertTriangle, ArrowLeft, Home } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { getStoredAuthSession } from '../services/picking-system-service';
 
 export default function Errorpage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const hasStoredUser = typeof window !== 'undefined' && Boolean(window.localStorage.getItem('user'));
+  const hasStoredUser = Boolean(getStoredAuthSession());
   const fallbackPath = hasStoredUser ? '/dashboard' : '/login';
 
   return (

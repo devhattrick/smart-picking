@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Dispatch, FormEvent, SetStateAction } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { mockUsers } from '../data/mockData';
+import { useNavigate } from 'react-router-dom';
+import { pickingSystemService } from '../services/picking-system-service';
 import type { User } from '../types';
 
 interface LoginProps {
@@ -12,19 +12,28 @@ export default function Login({ setUser }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const loginBackgroundUrl = `${import.meta.env.BASE_URL}inventory-modern.jpg`;
 
-  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const user = mockUsers.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
+
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      const session = await pickingSystemService.login({
+        username: username.trim(),
+        password,
+      });
+
+      setUser(session.user);
       navigate('/dashboard');
-    } else {
-      setError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'ไม่สามารถเข้าสู่ระบบได้');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,9 +88,10 @@ export default function Login({ setUser }: LoginProps) {
 
           <button 
             type="submit" 
-            className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md mt-2"
+            disabled={isSubmitting}
+            className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md mt-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            เข้าสู่ระบบ
+            {isSubmitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </form>
 

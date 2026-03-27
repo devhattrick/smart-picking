@@ -30,9 +30,14 @@ export interface MovementLog {
 export interface User {
     id: number;
     username: string;
-    password: string;
     role: UserRole;
     name: string;
+}
+
+export interface AppDataStatus {
+    isLoadingInitialData: boolean;
+    initialDataError: string | null;
+    reloadAppData: () => Promise<void>;
 }
 
 export interface AppOutletContext {
@@ -40,6 +45,9 @@ export interface AppOutletContext {
     setProducts: Dispatch<SetStateAction<Product[]>>;
     history: MovementLog[];
     setHistory: Dispatch<SetStateAction<MovementLog[]>>;
+    locations: string[];
+    setLocations: Dispatch<SetStateAction<string[]>>;
+    appDataStatus: AppDataStatus;
     user: User | null;
 }
 
@@ -48,6 +56,9 @@ export interface LayoutProps {
     setProducts: Dispatch<SetStateAction<Product[]>>;
     history: MovementLog[];
     setHistory: Dispatch<SetStateAction<MovementLog[]>>;
+    locations: string[];
+    setLocations: Dispatch<SetStateAction<string[]>>;
     user: User | null;
     setUser: Dispatch<SetStateAction<User | null>>;
+    appDataStatus: AppDataStatus;
 }
